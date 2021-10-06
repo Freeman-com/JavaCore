@@ -10,6 +10,7 @@ public class Calculator {
         String s = scan.nextLine();
 
         ParserWithArrayList parserWithArrayList = new ParserWithArrayList();
+
         System.out.println(parserWithArrayList.mathMaker(s));
 
     }
