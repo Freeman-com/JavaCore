@@ -4,7 +4,8 @@ class BinarySearchDemo {
     public static void main(String args[]) {
         int[] integerArray = {-183, 12, 15, 40, 234, 345, 800, 977800, 345, 977};
         int elementToFind = 977800;
-        System.out.println("Element " + elementToFind + " found, index: " + binarySearch(integerArray, elementToFind, 0, integerArray.length - 1));
+        System.out.println("Element " + elementToFind + " found, index: " + binarySearch(integerArray, elementToFind,
+                            0, integerArray.length - 1));
     }
 
     public static int binarySearch(int[] sortedIntegerArray, int elementToFind, int low, int high) {
