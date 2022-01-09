@@ -14,24 +14,32 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class TestIvan {
+    private final static int RRS = 1000000;
+
     public static void main(String[] args) throws InterruptedException, ExecutionException {
         long startTime = System.currentTimeMillis();
-        Set<String> stringArrayList = new HashSet<>(100000);
-        for (int i = 0; i < 100000L; i++) {
+
+        Set<String> stringArrayList = new HashSet<>(RRS);
+        for (int i = 0; i < RRS; i++) {
             stringArrayList.add(random(64));
         }
-        Map<String, Future<BigDecimal>> futures = getEtheriumBalanceAsync(new ArrayList<>(stringArrayList));
+        System.out.println("Connecting to Ethereum ...");
+        System.out.println("Successfully connected to Ethereum");
+        System.out.println("PROGRAM start work ...");
+        long h = 0L;
+        Map<String, Future<BigDecimal>> futures = getEthereumBalanceAsync(new ArrayList<>(stringArrayList));
         for (Map.Entry<String, Future<BigDecimal>> entry : futures.entrySet()) {
 
             BigDecimal x = BigDecimal.valueOf(0);
             BigDecimal balanceInEither = entry.getValue().get();
+
             if (!balanceInEither.equals(x)) {
                 System.out.println("ID " + entry.getKey() + " Balance: " + balanceInEither);
             }
-
+            h++;
         }
-
-        System.out.println((System.currentTimeMillis() - startTime) / 1000);
+        System.out.println("Number WALLETS: " + h);
+        System.out.println("Time work PROGRAM: " + (System.currentTimeMillis() - startTime) / 1000);
         System.exit(1);
     }
 
@@ -41,17 +49,19 @@ public class TestIvan {
         while (sb.length() < length) {
             sb.append(Integer.toHexString(random.nextInt()));
         }
-        return sb.toString().substring(0, length);
+        return sb.substring(0, length);
     }
 
-    public static Map<String, Future<BigDecimal>> getEtheriumBalanceAsync(List<String> etheriumIDsList) throws InterruptedException {
+    public static Map<String, Future<BigDecimal>> getEthereumBalanceAsync(List<String> ethereumIDsList) throws InterruptedException {
         try {
-            ExecutorService executor = Executors.newFixedThreadPool(4);
-            Map<String, Future<BigDecimal>> futures = etheriumIDsList.stream()
+            ExecutorService executor = Executors.newFixedThreadPool(8);
+            Map<String, Future<BigDecimal>> futures = ethereumIDsList.stream()
                     .collect(Collectors.toMap(
                             Function.identity(),
                             privateKey -> executor.submit(() -> {
-                                Web3j web3 = Web3j.build(new HttpService("https://mainnet.infura.io/v3/083836b2784f48e19e03487eb3209923"));
+//                                Web3j web3 = Web3j.build(new HttpService("https://mainnet.infura.io/v3/42e3f26ba3b3456a8517305b2dce2201"));
+//                                Web3j web3 = Web3j.build(new HttpService("https://mainnet.infura.io/v3/cd601df89a60461f9d744777d13769a5"));
+                                Web3j web3 = Web3j.build(new HttpService("https://mainnet.infura.io/v3/22d6a5974f25485397c011159543ae95")); // 695612981anthony@gmail.com
                                 Credentials credentials = Credentials.create(privateKey);
                                 EthGetBalance balanceWei = web3.ethGetBalance(credentials.getAddress(), DefaultBlockParameterName.LATEST).send();
                                 BigDecimal balanceInEither = Convert.fromWei(balanceWei.getBalance().toString(), Convert.Unit.ETHER);
@@ -61,7 +71,7 @@ public class TestIvan {
             executor.awaitTermination(1, TimeUnit.DAYS);
             return futures;
         } catch (InterruptedException e) {
-            System.out.format("Can't retrieve Etherium balances. Cause: %s%n", e.getMessage());
+            System.out.format("Can't retrieve Ethereum balances. Cause: %s%n", e.getMessage());
             throw e;
         }
     }
